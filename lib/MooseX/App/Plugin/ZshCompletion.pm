@@ -5,7 +5,7 @@ package MooseX::App::Plugin::ZshCompletion;
 
 use 5.010;
 
-our $VERSION = '0.001'; # VERSION
+our $VERSION = '0.001_001'; # VERSION
 
 use namespace::autoclean;
 use Moose::Role;
@@ -72,6 +72,16 @@ This plugin generates a zsh completion definition for your application.
 =head1 SEE ALSO
 
 L<MooseX::App::Plugin::BashCompletion>
+
+=head1 LICENSE
+
+COPYRIGHT AND LICENSE
+
+Copyright (C) 2015 by Tina Mueller
+
+This library is free software; you can redistribute it and/or modify it under
+the same terms as Perl itself. The full text of the license can be found
+in the LICENSE file.
 
 =cut
 

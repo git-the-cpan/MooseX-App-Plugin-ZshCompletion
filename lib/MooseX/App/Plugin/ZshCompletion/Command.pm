@@ -3,7 +3,7 @@ package MooseX::App::Plugin::ZshCompletion::Command;
 
 use Moose;
 use 5.010;
-our $VERSION = '0.001'; # VERSION
+our $VERSION = '0.001_001'; # VERSION
 
 use namespace::autoclean;
 use MooseX::App::Command;
@@ -16,7 +16,7 @@ sub zsh_completion {
     my %command_map;
     my $app_meta        = $app->meta;
     my $commands        = $app_meta->app_commands;
-    my $command_list    = join (' ', keys %{$commands});
+    my $command_list    = join (' ', sort keys %{$commands});
     my $package         = __PACKAGE__;
     my $prefix          = $app_meta->app_base;
 
@@ -29,10 +29,10 @@ sub zsh_completion {
 
     while (my ($command,$command_class) = each %$commands) {
         Class::Load::load_class($command_class);
-        #my @parameters = $app_meta->command_usage_attributes($command_class->meta,'parameter');
+        my @parameters = $app_meta->command_usage_attributes($command_class->meta,'parameter');
         my @options = $app_meta->command_usage_attributes($command_class->meta,[qw(option proto)]);
         $command_map{$command} = {
-            #parameters  => [ map { $_->is_required } @parameters ],
+            parameters  => \@parameters,
             options     => \@options,
         };
     }
@@ -44,13 +44,48 @@ sub zsh_completion {
     for my $command (sort keys %command_map) {
         my $data = $command_map{ $command };
         $subcmd .= <<"EOM";
-        $command)
-            _${prefix}_$command
-        ;;
+    $command)
+        _${prefix}_$command
+    ;;
 EOM
 
         my $options = $command_map{ $command }->{options};
         my $option_list = '';
+        my $parameter_list = '';
+        my $parameter_completion = '';
+
+        my $i = 2;
+        for my $param (@{ $command_map{ $command }->{parameters} }) {
+            my $name = $param->cmd_usage_name;
+            my $doc = $param->documentation;
+
+            my $comp = "_files";
+            if ($param->has_type_constraint) {
+                my $tc = $param->type_constraint;
+                if ($tc->isa('Moose::Meta::TypeConstraint::Enum')) {
+                    my $values = join ' ', sort @{ $tc->values };
+                    $comp = "compadd -X '$doc' $values";
+                }
+            }
+            my $position = $param->is_required ? $i : '*';
+            $parameter_list .= qq{    '$position: :->$name' \\\n};
+            $parameter_completion .= <<"EOM";
+        $name)
+            $comp
+        ;;
+EOM
+            $i++;
+        }
+        if (length $parameter_completion) {
+            $parameter_completion = <<"EOM";
+    curcontext="\${curcontext%:*:*}:$prefix-cmd-\$words[1]:"
+
+    case \$state in
+$parameter_completion
+    esac
+EOM
+        }
+
         for my $opt (@$options) {
             my $name = $opt->cmd_usage_name;
             my @names = $opt->cmd_name_possible;
@@ -66,7 +101,12 @@ EOM
                 $option_list .= "        '$opt[0]\[$doc\]";
             }
             if ($opt->has_type_constraint) {
-                if ($opt->type_constraint->is_a_type_of('Bool')) {
+                my $tc = $opt->type_constraint;
+                if ($tc->isa('Moose::Meta::TypeConstraint::Enum')) {
+                    my $values = join ' ', sort @{ $tc->values };
+                    $option_list .= ":$names[0]:($values)";
+                }
+                elsif ($opt->type_constraint->is_a_type_of('Bool')) {
                 }
                 else {
                     $option_list .= ":$names[0]";
@@ -77,9 +117,10 @@ EOM
         $subcmd_functions .= <<"EOM";
 _${prefix}_$command() {
     _arguments -C \\
-        '1: :->subcmd' \\
-        '*: :->args' \\
-$option_list && ret=0
+    '1: :->subcmd' \\
+$parameter_list$option_list && ret=0
+
+$parameter_completion
 }
 
 EOM
