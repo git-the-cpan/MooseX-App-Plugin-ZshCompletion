@@ -5,7 +5,7 @@ package MooseX::App::Plugin::ZshCompletion;
 
 use 5.010;
 
-our $VERSION = '0.001_001'; # VERSION
+our $VERSION = '0.002'; # VERSION
 
 use namespace::autoclean;
 use Moose::Role;
@@ -48,8 +48,9 @@ In your base class:
  package MyApp;
  use MooseX::App qw/ ZshCompletion /;
 
-     .zshrc:
-     fpath=('completion-dir/zsh' $fpath)
+In your .zshrc:
+
+    fpath=('completion-dir/zsh' $fpath)
 
 In your shell
 
@@ -60,6 +61,30 @@ In your shell
 =head1 DESCRIPTION
 
 This plugin generates a zsh completion definition for your application.
+
+Completion works for subcommands, parameters and options. If an option or
+parameter is declared as an C<enum> with L<Moose::Meta::TypeConstraint> you
+will get a completion for the enum values.
+
+Option completions will show its descriptions also.
+
+The default completion type for parameters is C<_files>
+
+In the examples directory you find C<myapp>.
+
+    % myapp <TAB>
+    bash_completion  fetch_mail    help          lala          zsh_completion
+
+    % myapp fetch_mail server.example -<TAB>
+    --dir                     -- Output 'dir'
+    --max                     -- Maximum number of emails to fetch
+    --servertype              -- Mailserver type: IMAP or POP3
+    --usage       --help  -h  -- Prints this usage information.
+    --user                    -- User
+    --verbose                 -- be verbose
+
+    % myapp fetch_mail server.example --servertype <TAB>
+    IMAP  POP3
 
 =head1 METHODS
 

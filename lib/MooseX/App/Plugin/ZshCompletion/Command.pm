@@ -3,7 +3,7 @@ package MooseX::App::Plugin::ZshCompletion::Command;
 
 use Moose;
 use 5.010;
-our $VERSION = '0.001_001'; # VERSION
+our $VERSION = '0.002'; # VERSION
 
 use namespace::autoclean;
 use MooseX::App::Command;
@@ -130,8 +130,6 @@ EOM
 #compdef $prefix
 
 # Built with $package on $year/$mon/$mday
-
-${prefix}_COMMANDS='help $command_list'
 
 _$prefix() {
     typeset -A opt_args

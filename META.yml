@@ -20,13 +20,13 @@ name: MooseX-App-Plugin-ZshCompletion
 provides:
   MooseX::App::Plugin::ZshCompletion:
     file: lib/MooseX/App/Plugin/ZshCompletion.pm
-    version: 0.001_001
+    version: '0.002'
   MooseX::App::Plugin::ZshCompletion::Command:
     file: lib/MooseX/App/Plugin/ZshCompletion/Command.pm
-    version: 0.001_001
+    version: '0.002'
   MooseX::App::Plugin::ZshCompletion::Meta::Class:
     file: lib/MooseX/App/Plugin/ZshCompletion/Meta/Class.pm
-    version: 0.001_001
+    version: '0.002'
 requires:
   IO::Interactive: '0'
   Moose: '0'
@@ -38,4 +38,4 @@ requires:
   warnings: '0'
 resources:
   repository: git://github.com/perlpunk/MooseX-App-Plugin-ZshCompletion
-version: 0.001_001
+version: '0.002'

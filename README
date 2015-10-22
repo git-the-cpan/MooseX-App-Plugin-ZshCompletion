@@ -1,7 +1,7 @@
 
 
 This archive contains the distribution MooseX-App-Plugin-ZshCompletion,
-version 0.001_001:
+version 0.002:
 
   zsh completion for your MooseX::App applications
 
